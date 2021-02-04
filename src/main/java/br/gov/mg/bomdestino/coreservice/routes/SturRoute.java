@@ -33,7 +33,7 @@ public class SturRoute extends RouteBuilder {
 	
 	@Override
 	public void configure() throws Exception {
-		restConfiguration().host(host).port(serverPort).bindingMode(RestBindingMode.auto);
+		restConfiguration().component("servlet").host(host).port(serverPort).bindingMode(RestBindingMode.auto);
 		
 		rest("/stur")
 			.post("/auth")
@@ -75,7 +75,7 @@ public class SturRoute extends RouteBuilder {
 			        in.setBody(authBody);
 				}
 			})
-			.marshal().json(JsonLibrary.Jackson)
+			.marshal().json(JsonLibrary.Gson)
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
 			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
 		.to("http://{{stur.url}}/auth?bridgeEndpoint=true&throwExceptionOnFailure=false");
@@ -95,7 +95,7 @@ public class SturRoute extends RouteBuilder {
 		
 		from("direct:call-itr-rest-all")
 			.routeId("itr-service")
-			.to("direct:stur-auth").unmarshal().json(JsonLibrary.Jackson)
+			.to("direct:stur-auth").unmarshal().json(JsonLibrary.Gson)
 			.onException(Exception.class)
 				.handled(true)
 				.setBody(constant("[]"))

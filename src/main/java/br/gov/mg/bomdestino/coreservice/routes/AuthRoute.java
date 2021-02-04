@@ -2,6 +2,7 @@ package br.gov.mg.bomdestino.coreservice.routes;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -21,15 +22,14 @@ public class AuthRoute extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		restConfiguration()
+			.component("servlet")
 			.host(host)
 			.port(serverPort)
-			.bindingMode(RestBindingMode.auto);
+			.bindingMode(RestBindingMode.json);
 		
 		rest("/core")
 			.post("/auth")
 				.type(Auth.class)
-				.consumes("application/json")
-				.produces("application/json")
 				.route().routeId("rest-core-auth")
 				.to("direct:core-auth")
 			.endRest();

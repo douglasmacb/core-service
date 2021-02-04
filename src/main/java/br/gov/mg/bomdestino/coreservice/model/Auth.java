@@ -1,8 +1,16 @@
 package br.gov.mg.bomdestino.coreservice.model;
 
-public class Auth {
+import java.io.Serializable;
+
+public class Auth implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5988667930758933024L;
 	private String email;
 	private String senha;
+	
+	public Auth() {}
 
 	public Auth(String email, String senha) {
 		super();
