@@ -30,6 +30,12 @@
 			<version>${camel.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-jsonpath-starter</artifactId>
+			<version>${camel.version}</version>
+		</dependency>
+
 		 <dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-servlet-starter</artifactId>

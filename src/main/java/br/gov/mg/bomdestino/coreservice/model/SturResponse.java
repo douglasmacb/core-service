@@ -1,8 +1,14 @@
 package br.gov.mg.bomdestino.coreservice.model;
 
-public class SturResponse {
+import java.io.Serializable;
+
+public class SturResponse implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3460413802528949408L;
 	private String token;
-	private String tipo;
+	private Boolean valid;
 
 	/**
 	 * @return the token
@@ -18,18 +24,12 @@ public class SturResponse {
 		this.token = token;
 	}
 
-	/**
-	 * @return the tipo
-	 */
-	public String getTipo() {
-		return tipo;
+	public Boolean getValid() {
+		return valid;
 	}
 
-	/**
-	 * @param tipo the tipo to set
-	 */
-	public void setTipo(String tipo) {
-		this.tipo = tipo;
+	public void setValid(Boolean valid) {
+		this.valid = valid;
 	}
 
 }

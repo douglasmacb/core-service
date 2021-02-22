@@ -33,9 +33,15 @@ public class SturRoute extends RouteBuilder {
 	
 	@Override
 	public void configure() throws Exception {
-		restConfiguration().component("servlet").host(host).port(serverPort).bindingMode(RestBindingMode.auto);
+		restConfiguration()
+		.component("servlet")
+		.host(host)
+		.port(serverPort)
+		.clientRequestValidation(true)
+		.bindingMode(RestBindingMode.auto);
 		
 		rest("/stur")
+			
 			.post("/auth")
 				.type(Auth.class)
 				.consumes("application/json")
@@ -46,7 +52,10 @@ public class SturRoute extends RouteBuilder {
 			
 			.get("/iptu")
 				.route().routeId("rest-all-iptu")
-				.to("direct:call-iptu-rest-all")
+				.to("direct:validate-token")
+				.choice()
+					.when(simple("${body['valid']} == 'true'")).to("direct:call-iptu-rest-all")
+					.otherwise().to("direct:unauthorized")
 			.endRest()
 			
 			.get("/itr")
@@ -94,8 +103,7 @@ public class SturRoute extends RouteBuilder {
 		.to("http://{{stur.url}}/iptu");
 		
 		from("direct:call-itr-rest-all")
-			.routeId("itr-service")
-			.to("direct:stur-auth").unmarshal().json(JsonLibrary.Gson)
+			.routeId("itr-service")			
 			.onException(Exception.class)
 				.handled(true)
 				.setBody(constant("[]"))
@@ -129,6 +137,11 @@ public class SturRoute extends RouteBuilder {
 			.setHeader("Authorization", constant(sturToken))
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
 		.toD("http://{{stur.url}}/iptu/cpf/${header.cpf}");
+		
+		from("direct:unauthorized")
+			.setBody(constant("[]"));
+		
+			
 	}
 
 }
