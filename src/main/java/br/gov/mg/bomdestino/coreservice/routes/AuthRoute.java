@@ -23,9 +23,14 @@ public class AuthRoute extends RouteBuilder {
 	public void configure() throws Exception {
 		restConfiguration()
 			.component("servlet")
+			.bindingMode(RestBindingMode.json)
 			.host(host)
 			.port(serverPort)
-			.bindingMode(RestBindingMode.json);
+			.enableCORS(true) 
+	        .corsAllowCredentials(true) 
+	        .corsHeaderProperty("Access-Control-Allow-Origin","*")
+	        .corsHeaderProperty("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS")
+	        .corsHeaderProperty("Access-Control-Allow-Headers","Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization");
 		
 		rest("/core")
 			.post("/auth")
@@ -41,6 +46,8 @@ public class AuthRoute extends RouteBuilder {
 	
 		from("direct:core-auth")
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
 		.to("http://{{auth.service.url}}/auth?bridgeEndpoint=true&throwExceptionOnFailure=false");
 		
@@ -48,6 +55,8 @@ public class AuthRoute extends RouteBuilder {
 			.routeId("validate-token")
 			.removeHeaders("CamelHttp*")
 			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
 		.toD("http://{{auth.service.url}}/auth/token/validate/${header.authorization}")
 			.unmarshal().json(JsonLibrary.Gson)

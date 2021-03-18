@@ -34,11 +34,16 @@ public class SturRoute extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		restConfiguration()
-		.component("servlet")
+		.bindingMode(RestBindingMode.auto)
+		.component("servlet")		
 		.host(host)
 		.port(serverPort)
 		.clientRequestValidation(true)
-		.bindingMode(RestBindingMode.auto);
+		.enableCORS(true) 
+        .corsAllowCredentials(true) 
+        .corsHeaderProperty("Access-Control-Allow-Origin","*")
+        .corsHeaderProperty("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS")
+        .corsHeaderProperty("Access-Control-Allow-Headers","Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization");
 		
 		rest("/stur")
 			
@@ -63,13 +68,18 @@ public class SturRoute extends RouteBuilder {
 				.to("direct:call-itr-rest-all")
 			.endRest()
 			
-			.get("/iptu/cnpj/{cnpj}")
+			.get("/itr/cnpj/{cnpj}")
 				.route().routeId("rest-itr-by-cnpj")
+				.to("direct:itr-cnpj-service")
+			.endRest()
+		
+			.get("/iptu/cnpj/{cnpj}")
+				.route().routeId("rest-iptu-by-cnpj")
 				.to("direct:iptu-cnpj-service")
 			.endRest()
 			
 			.get("/iptu/cpf/{cpf}")
-				.route().routeId("rest-itr-by-cpf")
+				.route().routeId("rest-iptu-by-cpf")
 				.to("direct:iptu-cpf-service")
 			.endRest();
 		
@@ -87,6 +97,7 @@ public class SturRoute extends RouteBuilder {
 			.marshal().json(JsonLibrary.Gson)
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
 			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 		.to("http://{{stur.url}}/auth?bridgeEndpoint=true&throwExceptionOnFailure=false");
 
 		from("direct:call-iptu-rest-all")
@@ -99,6 +110,8 @@ public class SturRoute extends RouteBuilder {
 			
 			.removeHeaders("CamelHttp*")
 			.setHeader("Authorization", constant(sturToken))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
 		.to("http://{{stur.url}}/iptu");
 		
@@ -111,6 +124,8 @@ public class SturRoute extends RouteBuilder {
 			
 			.removeHeaders("CamelHttp*")
 			.setHeader("Authorization", constant(sturToken))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
 		.to("http://{{stur.url}}/itr");
 		
@@ -123,8 +138,24 @@ public class SturRoute extends RouteBuilder {
 			.end()
 			.removeHeaders("CamelHttp*")
 			.setHeader("Authorization", constant(sturToken))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
 			.toD("http://{{stur.url}}/iptu/cnpj/${header.cnpj}");
+		
+		from("direct:itr-cnpj-service")
+		.routeId("itr-cnpj-service")
+		
+		.onException(Exception.class)
+			.handled(true)
+			.setBody(constant("[]"))
+		.end()
+		.removeHeaders("CamelHttp*")
+		.setHeader("Authorization", constant(sturToken))
+		.setHeader("Access-Control-Allow-Origin", constant("*"))
+		.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
+		.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+		.toD("http://{{stur.url}}/itr/cnpj/${header.cnpj}");
 		
 		from("direct:iptu-cpf-service")
 			.routeId("iptu-cpf-service")
@@ -135,6 +166,8 @@ public class SturRoute extends RouteBuilder {
 			.end()
 			.removeHeaders("CamelHttp*")
 			.setHeader("Authorization", constant(sturToken))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
 		.toD("http://{{stur.url}}/iptu/cpf/${header.cpf}");
 		
