@@ -55,6 +55,11 @@ public class CitizeRoute extends RouteBuilder {
 					.to("direct:rest-service-update-status")
 				.endRest()
 			
+			.get("/solicitacao/{id}/historico")
+				.route().routeId("rest-service-get-historico")
+					.to("direct:rest-service-get-historico")
+				.endRest()
+				
 			.post("/solicitacao")
 				.route().routeId("rest-service-create")
 				.to("direct:rest-service-create")
@@ -80,6 +85,17 @@ public class CitizeRoute extends RouteBuilder {
 			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
 		.to("http://{{citizen.service.url}}/status?bridgeEndpoint=true&throwExceptionOnFailure=false");
+		
+		from("direct:rest-service-get-historico")
+			.onException(Exception.class)
+				.handled(true)
+				.setHeader(Exchange.HTTP_RESPONSE_CODE).constant(HttpStatus.NO_CONTENT)
+			.end()
+			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
+			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+		.toD("http://{{citizen.service.url}}/solicitacao/${header.id}/historico?bridgeEndpoint=true&throwExceptionOnFailure=false");
 			
 		from("direct:service-get-by-protocol")
 			.routeId("route-service-get-by-protocol")
@@ -104,6 +120,7 @@ public class CitizeRoute extends RouteBuilder {
 			.removeHeaders("CamelHttp*")
 			.setHeader("Access-Control-Allow-Origin", constant("*"))
 			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
+			.setHeader("responsavel", constant("Prefeitura"))
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.PATCH))
 		.toD("http://{{citizen.service.url}}/solicitacao/${header.id}/status/${header.idStatus}");
 			
