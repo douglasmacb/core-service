@@ -32,13 +32,18 @@ public class CitizeRoute extends RouteBuilder {
 		rest("/servico")
 			.get()
 				.route().routeId("rest-service-get-all")
-				.to("direct:service-get-all")
-			.endRest()
+					.to("direct:service-get-all")
+				.endRest()
+			
+			.get("/contatos")
+				.route().routeId("rest-service-get-contatos")
+					.to("direct:rest-service-get-contatos")
+				.endRest()
 			
 			.get("/protocolo/{protocol}")
 				.route().routeId("rest-service-get-by-protocol")
-				.to("direct:service-get-by-protocol")
-			.endRest()
+					.to("direct:service-get-by-protocol")
+				.endRest()
 			
 			.get("/solicitacao")
 				.route().routeId("rest-service-order-get-all")
@@ -62,8 +67,8 @@ public class CitizeRoute extends RouteBuilder {
 				
 			.post("/solicitacao")
 				.route().routeId("rest-service-create")
-				.to("direct:rest-service-create")
-			.endRest();
+					.to("direct:rest-service-create")
+				.endRest();
 	
 		from("direct:service-get-all")
 			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
@@ -130,6 +135,13 @@ public class CitizeRoute extends RouteBuilder {
 			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
 			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
 		.to("http://{{citizen.service.url}}/solicitacao?bridgeEndpoint=true&throwExceptionOnFailure=false");
+		
+		from("direct:rest-service-get-contatos")
+			.setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+			.setHeader("Access-Control-Allow-Origin", constant("*"))
+			.setHeader("Access-Control-Allow-Methods", constant("GET,PUT,POST,DELETE,PATCH,OPTIONS"))
+			.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+		.to("http://{{citizen.service.url}}/contatos?bridgeEndpoint=true&throwExceptionOnFailure=false");
 		
 	}
 }
