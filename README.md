@@ -1,6 +1,6 @@
 # Core
 
-Esse serviço cuida da integração entre os serviços do sistema.
+O core service é responsável por integrar os sistemas novos e legados presentes na arquitetura.
 
 ![Arquitetura de Comunicação SGM](https://user-images.githubusercontent.com/16320311/114250956-c3322980-9975-11eb-810f-a3d8a4cd7906.png)
 
